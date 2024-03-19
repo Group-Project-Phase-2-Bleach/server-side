@@ -10,10 +10,13 @@ const upload = multer({ storage: multer.memoryStorage() });
 const cors = require("cors");
 
 
-const UserController = require("./controllers/UserController");
 const authentication = require("./middlewares/authentication");
-const ProfileController = require("./controllers/ProfileController");
 const profileAuthorization = require("./middlewares/profileAuthorization");
+const deleteDirectMessageAuthorization = require("./middlewares/deleteDirectMessage");
+const UserController = require("./controllers/UserController");
+const ProfileController = require("./controllers/ProfileController");
+const MessageController = require("./controllers/MessageController");
+const errorHandler = require("./middlewares/errorHandler");
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -36,10 +39,13 @@ app.get("/profile/:username", ProfileController.getProfileByUsername)
 app.post("/profile", upload.single("image"), ProfileController.createProfile)
 app.put("/profile/:username",profileAuthorization, upload.single("image"), ProfileController.updateProfile)
 
+app.get("/:username/message", MessageController.getDirectMessages)
+app.post("/:username/message", upload.single("image"), MessageController.sendDirectMessage)
+app.delete("/:id/message",deleteDirectMessageAuthorization, MessageController.deleteDirectMessage)
 
 
 
-
+app.use(errorHandler);
 
 app.listen(port, () => {
   console.log("Server is running " + port);

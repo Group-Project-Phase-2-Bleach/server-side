@@ -13,9 +13,13 @@ const cors = require("cors");
 const authentication = require("./middlewares/authentication");
 const profileAuthorization = require("./middlewares/profileAuthorization");
 const deleteDirectMessageAuthorization = require("./middlewares/deleteDirectMessage");
+const deletePublicMessageAuthorization = require("./middlewares/deletePublicMessage");
+
 const UserController = require("./controllers/UserController");
 const ProfileController = require("./controllers/ProfileController");
 const MessageController = require("./controllers/MessageController");
+const GroupController = require("./controllers/GroupController");
+
 const errorHandler = require("./middlewares/errorHandler");
 
 app.use(express.urlencoded({ extended: false }));
@@ -43,7 +47,9 @@ app.get("/:username/message", MessageController.getDirectMessages)
 app.post("/:username/message", upload.single("image"), MessageController.sendDirectMessage)
 app.delete("/:id/message",deleteDirectMessageAuthorization, MessageController.deleteDirectMessage)
 
-
+app.use("/group", GroupController.getAllPublicGroupMessage)
+app.post("/group", upload.single("image"), GroupController.sendMessageToPublicGroup)
+app.delete("/group/:id", deletePublicMessageAuthorization, GroupController.deletePublicGroupMessage)
 
 app.use(errorHandler);
 

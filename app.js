@@ -53,6 +53,4 @@ app.delete("/group/:id", deletePublicMessageAuthorization, GroupController.delet
 
 app.use(errorHandler);
 
-app.listen(port, () => {
-  console.log("Server is running " + port);
-});
+module.exports = app;

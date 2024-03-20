@@ -1,5 +1,5 @@
 if (process.env.NODE_ENV !== "production") {
-  require("dotenv").config(); 
+  require("dotenv").config();
 }
 
 // const port = 3000;
@@ -13,12 +13,14 @@ const { Server } = require("socket.io");
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: "https://koneksi-on.web.app",
+    origin:
+      process.env.NODE_ENV === "production"
+        ? "https://koneksi-on.web.app"
+        : "http://localhost:5173",
     methods: ["GET", "POST"],
   },
 });
 const PORT = process.env.PORT || 3000;
-
 
 const authentication = require("./middlewares/authentication");
 const profileAuthorization = require("./middlewares/profileAuthorization");
@@ -44,31 +46,51 @@ app.get("/", (req, res) => {
   res.status(200).json({ message: "Hello world" });
 });
 
-app.use(authentication)
+app.use(authentication);
 
 app.get("/user", UserController.findCurrentlyLoggedUser);
+app.get("/user/message-list", UserController.getMessageListOnUserByMessage);
 
-app.get("/profile", ProfileController.getAllProfiles)
-app.get("/profile/:username", ProfileController.getProfileByUsername)
-app.post("/profile", upload.single("image"), ProfileController.createProfile)
-app.put("/profile/:username",profileAuthorization, upload.single("image"), ProfileController.updateProfile)
+app.get("/profile", ProfileController.getAllProfiles);
+app.get("/profile/:username", ProfileController.getProfileByUsername);
+app.post("/profile", upload.single("image"), ProfileController.createProfile);
+app.put(
+  "/profile/:username",
+  profileAuthorization,
+  upload.single("image"),
+  ProfileController.updateProfile
+);
 
-app.get("/:username/message", MessageController.getDirectMessages)
-app.post("/:username/message", upload.single("image"), MessageController.sendDirectMessage)
-app.delete("/:id/message",deleteDirectMessageAuthorization, MessageController.deleteDirectMessage)
+app.get("/:username/message", MessageController.getDirectMessages);
+app.post(
+  "/:username/message",
+  upload.single("image"),
+  MessageController.sendDirectMessage
+);
+app.delete(
+  "/:id/message",
+  deleteDirectMessageAuthorization,
+  MessageController.deleteDirectMessage
+);
 
-app.use("/group", GroupController.getAllPublicGroupMessage)
-app.post("/group", upload.single("image"), GroupController.sendMessageToPublicGroup)
-app.delete("/group/:id", deletePublicMessageAuthorization, GroupController.deletePublicGroupMessage)
+app.use("/group", GroupController.getAllPublicGroupMessage);
+app.post(
+  "/group",
+  upload.single("image"),
+  GroupController.sendMessageToPublicGroup
+);
+app.delete(
+  "/group/:id",
+  deletePublicMessageAuthorization,
+  GroupController.deletePublicGroupMessage
+);
 
 app.use(errorHandler);
-
 
 io.on("connection", (socket) => {
   console.log({ status: `User Connected.` });
 
   socket.on("sendMessage", (data) => {
-
     io.emit("broadcastMessage", data);
   });
 
@@ -84,6 +106,5 @@ io.on("connection", (socket) => {
 httpServer.listen(PORT, () => {
   console.log("Server is running on port", PORT);
 });
-
 
 module.exports = app;

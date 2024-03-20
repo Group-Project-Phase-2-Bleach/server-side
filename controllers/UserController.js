@@ -1,6 +1,7 @@
+const { Op } = require("sequelize");
 const { comparePassword } = require("../helpers/bcrypt");
 const { signToken } = require("../helpers/jwt");
-const { User, Profile } = require("../models");
+const { User, Profile, PrivateMessage } = require("../models");
 const { OAuth2Client } = require("google-auth-library");
 const client = new OAuth2Client();
 
@@ -15,7 +16,7 @@ module.exports = class UserController {
       });
       res.status(201).json({ username, email });
     } catch (error) {
-      console.log(error)
+      console.log(error);
       next(error);
     }
   }
@@ -73,7 +74,7 @@ module.exports = class UserController {
           "888996035254-qqqrffv50i0tk2i45ja7j75g1ii9nlkg.apps.googleusercontent.com",
       });
       const { email, picture, name } = ticket.getPayload();
-      
+
       const [username] = email.split("@");
 
       const google = ticket.getPayload();
@@ -91,9 +92,7 @@ module.exports = class UserController {
       });
       console.log({ user, created });
 
-      
       const access_token = signToken({ id: user.id });
-      
 
       const findProfile = await Profile.findOrCreate({
         where: { UserId: user.id },
@@ -115,7 +114,7 @@ module.exports = class UserController {
     try {
       const user = await User.findOne({
         where: { id: req.user.id },
-        attributes: { exclude: ["password"] }, 
+        attributes: { exclude: ["password"] },
         include: [
           {
             model: Profile,

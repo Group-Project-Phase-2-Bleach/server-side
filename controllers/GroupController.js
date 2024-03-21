@@ -38,6 +38,7 @@ module.exports = class GroupController {
 
   static async sendMessageToPublicGroup(req, res, next) {
     try {
+      console.log(req.body)
       const { text } = req.body;
       if (!text) {
         throw {
@@ -46,7 +47,6 @@ module.exports = class GroupController {
           message: "Message is required.",
         };
       }
-
       if (req.file) {
         const imageBuffer = req.file.buffer;
         const base64Image = imageBuffer.toString("base64");
